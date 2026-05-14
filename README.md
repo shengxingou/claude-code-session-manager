@@ -2,6 +2,10 @@
 
 一个面向 macOS 的 Claude Code 会话管理器，提供本地桌面窗口界面，用于浏览 `~/.claude` 下的项目与会话、恢复或分叉历史会话、查看活跃会话，并在 `cmux` 或原生 Terminal.app 中直接启动 Claude Code。
 
+## 主界面预览
+
+![Claude Code Session Manager 主界面](assets/main-interface.png)
+
 ## 功能特性
 
 - 按项目聚合 Claude Code 会话历史
