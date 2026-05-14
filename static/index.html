@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 会话管理器</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- 标题栏 -->
+<header class="titlebar">
+  <div class="titlebar-left">
+    <div class="traffic-lights">
+      <span class="traffic-light red"></span>
+      <span class="traffic-light yellow"></span>
+      <span class="traffic-light green"></span>
+    </div>
+    <span class="titlebar-title">Claude Code 会话管理器</span>
+  </div>
+  <div class="titlebar-search">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="searchInput" placeholder="搜索对话..." autocomplete="off">
+    <button id="searchClear" class="search-clear" style="display:none">&times;</button>
+  </div>
+</header>
+
+<!-- 主布局 -->
+<div class="main-layout">
+  <!-- 侧栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span>项目</span>
+      <div class="sidebar-header-actions">
+        <button id="btnNewProject" class="sidebar-action" title="新建项目 (选择文件夹)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <button id="refreshBtn" class="sidebar-action" title="刷新">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="23,4 23,10 17,10"/><path d="M20.49,15a9,9,0,1,1-2.12-9.36L23,10"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <nav class="sidebar-list" id="projectList">
+      <div class="loading-text">加载中...</div>
+    </nav>
+  </aside>
+
+  <!-- 内容区 -->
+  <main class="content" id="content">
+    <!-- 工具栏 -->
+    <div class="toolbar" id="toolbar">
+      <div class="toolbar-left">
+        <button class="toolbar-btn" id="btnContinue" disabled title="在选中项目目录继续最近会话 (⌘C)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5,3 19,12 5,21"/>
+          </svg>
+          <span>继续最近</span>
+        </button>
+        <button class="toolbar-btn" id="btnNewSession" disabled title="在选中项目目录新建会话 (⌘N)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>新建会话</span>
+        </button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn" id="btnActiveSessions" title="查看所有活跃会话">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/>
+          </svg>
+          <span>活跃会话</span>
+        </button>
+        <label class="skip-perms-label" title="跳过权限确认，直接执行工具调用">
+          <input type="checkbox" id="chkSkipPermissions">
+          <span>跳过权限</span>
+        </label>
+        <div class="toolbar-divider"></div>
+        <span class="toolbar-breadcrumb" id="breadcrumb">选择左侧项目查看会话</span>
+      </div>
+      <div class="toolbar-right">
+        <span class="toolbar-info" id="toolbarInfo"></span>
+      </div>
+    </div>
+
+    <!-- 会话列表 -->
+    <div class="session-list" id="sessionList">
+      <div class="empty-state" id="emptyState">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+          <path d="M22,19a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V5a2,2,0,0,1,2-2H9l2,3h9a2,2,0,0,1,2,2Z"/>
+        </svg>
+        <p>选择左侧项目以查看会话记录</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 消息详情面板 -->
+<div class="detail-panel" id="detailPanel" style="display:none">
+  <div class="detail-header">
+    <h3 id="detailTitle">会话详情</h3>
+    <div class="detail-actions">
+      <button id="btnResumeSession" class="detail-btn" title="恢复此会话">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+        恢复
+      </button>
+      <button id="btnForkSession" class="detail-btn" title="分叉此会话">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18,9a9,9,0,0,1-9,9"/>
+        </svg>
+        分叉
+      </button>
+      <button id="btnCloseDetail" class="detail-btn">关闭</button>
+    </div>
+  </div>
+  <div class="detail-messages" id="detailMessages">
+    <div class="loading-text">加载中...</div>
+  </div>
+  <div class="detail-footer" id="detailFooter" style="display:none">
+    <span class="detail-footer-info" id="detailFooterInfo"></span>
+    <button class="detail-btn" id="btnLoadMore">加载更多</button>
+  </div>
+</div>
+
+<!-- 状态栏 -->
+<footer class="status-bar" id="statusBar">
+  <span id="statusBarText">加载中...</span>
+  <button id="btnShutdown" class="shutdown-btn" title="停止会话管理器服务">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <rect x="6" y="6" width="12" height="12" rx="1"/>
+    </svg>
+    停止服务
+  </button>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

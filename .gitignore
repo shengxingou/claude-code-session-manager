@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.venv/
+.venv-app/
+
+build/
+dist/
+*.spec
+
+.claude/settings.local.json
+.claude/scheduled_tasks.json
+
+session-manager_副本.py
